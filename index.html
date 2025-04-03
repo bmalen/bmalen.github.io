@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A mystical portal to Ben Malen's LinkedIn profile"
+    />
+    <title>benmalen.com</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: radial-gradient(
+          circle at 30% 30%,
+          #1a0a33 0%,
+          #120726 50%,
+          #0d0519 100%
+        );
+        font-family: "Courier New", monospace;
+        color: #00ccff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        position: relative;
+      }
+
+      /* Additional layered backgrounds for depth */
+      body:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+            circle at 70% 65%,
+            rgba(60, 20, 90, 0.3) 0%,
+            rgba(60, 20, 90, 0) 50%
+          ),
+          radial-gradient(
+            circle at 20% 40%,
+            rgba(40, 10, 70, 0.4) 0%,
+            rgba(40, 10, 70, 0) 60%
+          );
+        z-index: -1;
+      }
+
+      /* Terminal command prompt container */
+      .terminal {
+        position: relative;
+        font-size: clamp(0.8rem, 2vw, 1.5rem);
+        z-index: 10;
+        text-shadow: 0 0 5px #00ccff, 0 0 10px #00ccff,
+          0 0 15px rgba(0, 204, 255, 0.5);
+        user-select: none;
+      }
+
+      /* Flowing text animation */
+      @keyframes textFlow {
+        0% {
+          text-shadow: 0 0 5px #00ccff, 0 0 10px #00ccff,
+            0 0 15px rgba(0, 204, 255, 0.3);
+        }
+        50% {
+          text-shadow: 0 0 7px #00ccff, 0 0 14px #00ccff,
+            0 0 20px rgba(0, 204, 255, 0.6);
+        }
+        100% {
+          text-shadow: 0 0 5px #00ccff, 0 0 10px #00ccff,
+            0 0 15px rgba(0, 204, 255, 0.3);
+        }
+      }
+
+      .glowing-text {
+        animation: textFlow 2s ease-in-out infinite;
+      }
+
+      /* Blinking cursor */
+      .cursor {
+        display: inline-block;
+        width: 0.6em;
+        height: 1em;
+        background-color: #00ccff;
+        margin-left: 0.2em;
+        vertical-align: text-bottom;
+        animation: blink 1s step-end infinite;
+        box-shadow: 0 0 5px #00ccff, 0 0 10px rgba(0, 204, 255, 0.5);
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* Canvas for particle animations */
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      /* Skip link for accessibility */
+      .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: #00ccff;
+        color: #000;
+        padding: 8px;
+        z-index: 100;
+        transition: top 0.3s;
+      }
+
+      .skip-link:focus {
+        top: 0;
+      }
+
+      /* Visually hidden class for accessibility text */
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Accessibility skip link -->
+    <a
+      href="https://www.linkedin.com/in/benmalen/"
+      class="skip-link"
+      tabindex="0"
+      >Skip to LinkedIn profile</a
+    >
+
+    <!-- Canvas for particle animation -->
+    <canvas id="particleCanvas" aria-hidden="true"></canvas>
+
+    <!-- Hidden description for screen readers -->
+    <span id="portal-description" class="visually-hidden">
+      Click anywhere or press Enter to navigate to
+      Ben Malen's LinkedIn profile.
+    </span>
+
+    <!-- Terminal prompt -->
+    <div
+      class="terminal glowing-text"
+      role="button"
+      tabindex="0"
+      aria-label="Navigate to Ben Malen's LinkedIn profile"
+      aria-describedby="portal-description"
+    >
+      &gt; linkedin/benmalen<span class="cursor" aria-hidden="true"></span>
+    </div>
+
+    <script>
+      // Canvas setup
+      const canvas = document.getElementById("particleCanvas");
+      const ctx = canvas.getContext("2d");
+      const particleCount = 300; // Increased from 200 to 300
+      let particles = [];
+
+      // Particle color palette (Purples dominant, accents rarer)
+      const colors = [
+        // Purples (Higher probability)
+        { h: 271, s: 76, l: 53, a: 0.5 }, // Medium Purple like
+        { h: 275, s: 80, l: 45, a: 0.4 }, // Darker Purple
+        { h: 260, s: 60, l: 60, a: 0.45 }, // Lighter Violet
+        { h: 280, s: 50, l: 40, a: 0.4 }, // Deep Purple
+        { h: 300, s: 100, l: 25, a: 0.4 }, // Indigo like
+        // Pinks/Magentas (Lower probability)
+        { h: 300, s: 100, l: 50, a: 0.6 }, // Magenta (Brighter)
+        { h: 320, s: 90, l: 60, a: 0.55 }, // Hot Pink like
+        { h: 330, s: 85, l: 55, a: 0.5 }, // Deep Pink like
+      ];
+
+      function getRandomColor() {
+        // Increase chances for purple colors (indices 0-4)
+        const rand = Math.random();
+        let colorIndex;
+        if (rand < 0.85) {
+          // 85% chance for purple
+          colorIndex = Math.floor(Math.random() * 5);
+        } else {
+          // 15% chance for pink/magenta
+          colorIndex = Math.floor(Math.random() * 3) + 5;
+        }
+        const c = colors[colorIndex];
+        // Add slight variations to saturation and lightness
+        const sVariation = (Math.random() - 0.5) * 10;
+        const lVariation = (Math.random() - 0.5) * 10;
+        const finalS = Math.max(0, Math.min(100, c.s + sVariation));
+        const finalL = Math.max(15, Math.min(70, c.l + lVariation)); // Keep lightness in range
+        return `hsla(${c.h}, ${finalS}%, ${finalL}%, ${c.a})`;
+      }
+
+      // Handle resize for responsive canvas
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        // Regenerate particles when screen size changes
+        initParticles();
+      }
+
+      // Initialize on load and handle resize
+      window.addEventListener("resize", resizeCanvas);
+      window.addEventListener("load", resizeCanvas);
+
+      // Create a particle with specified properties
+      function createParticle(x, y) {
+        // Add occasional larger particles
+        const sizeBias = Math.random();
+        let size;
+
+        if (sizeBias > 0.95) {
+          // 5% chance for much larger spores (6-10px)
+          size = Math.random() * 4 + 6;
+        } else if (sizeBias > 0.8) {
+          // 15% chance for medium-large spores (4-7px)
+          size = Math.random() * 3 + 4;
+        } else {
+          // 80% chance for smaller spores (1-5px)
+          size = Math.random() * 4 + 1;
+        }
+
+        const effectType = Math.random();
+        let effect = "sharp";
+        if (effectType > 0.85) effect = "glow"; // Rarer glow
+        else if (effectType > 0.65) effect = "blurry";
+        else if (effectType > 0.3) effect = "slightBlur";
+
+        const shapeType = Math.random();
+        let shape = "circle";
+        if (shapeType > 0.9) shape = "square"; // 10% square
+        else if (shapeType > 0.8) shape = "triangle"; // 10% triangle
+
+        return {
+          x: x !== undefined ? x : Math.random() * canvas.width,
+          y: y !== undefined ? y : Math.random() * canvas.height, // Distribute throughout the screen initially
+          startY: y !== undefined ? y : Math.random() * canvas.height,
+          size: size,
+          speedY: -(Math.random() * 0.3 + 0.1) * (size > 5 ? 0.7 : 1), // Larger particles move slightly slower
+          speedX: (Math.random() - 0.5) * 0.2,
+          color: getRandomColor(),
+          opacity: Math.random() * 0.6, // Random initial opacity
+          maxOpacity: 0.4 + Math.random() * 0.3, // Vary max opacity (0.4 to 0.7)
+          fadeState: "visible", // 'in', 'visible', 'out'
+          wobbleFactor: Math.random() * 0.08 + 0.02, // How much wobble
+          wobbleSpeed: Math.random() * 0.001 + 0.0005, // How fast wobble
+          effect: effect,
+          shape: shape,
+        };
+      }
+
+      // Generate particles distributed across the entire screen
+      function initParticles() {
+        particles = [];
+        for (let i = 0; i < particleCount; i++) {
+          particles.push(createParticle());
+        }
+      }
+
+      // Draw and update particles
+      function drawParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach((p) => {
+          // --- Update Particle ---
+
+          // Movement
+          p.y += p.speedY;
+          p.x +=
+            p.speedX +
+            Math.sin(Date.now() * p.wobbleSpeed + p.startY) * p.wobbleFactor; // Organic wobble
+
+          // Fade In/Out Logic
+          if (p.fadeState === "in") {
+            p.opacity += 0.01;
+            if (p.opacity >= p.maxOpacity) {
+              p.opacity = p.maxOpacity;
+              p.fadeState = "visible";
+            }
+          } else if (p.fadeState === "out") {
+            p.opacity -= 0.01;
+            if (p.opacity <= 0) {
+              // Reset particle when fully faded out
+              Object.assign(
+                p,
+                createParticle(Math.random() * canvas.width, canvas.height + 20)
+              ); // Recreate below screen
+              return; // Skip drawing this frame
+            }
+          }
+
+          // Trigger fade out near top
+          if (p.y < canvas.height * 0.1 && p.fadeState === "visible") {
+            p.fadeState = "out";
+          }
+
+          // Reset particle if it goes off screen
+          if (p.y < -p.size * 2) {
+            Object.assign(
+              p,
+              createParticle(Math.random() * canvas.width, canvas.height + 10)
+            );
+            return; // Skip drawing
+          }
+
+          // --- Draw Particle ---
+          ctx.save(); // Save context state
+
+          ctx.globalAlpha = p.opacity;
+          ctx.fillStyle = p.color;
+
+          // Apply Effects
+          ctx.shadowColor = "transparent"; // Reset shadow
+          ctx.shadowBlur = 0;
+          ctx.filter = "none"; // Reset filter
+
+          switch (p.effect) {
+            case "slightBlur":
+              ctx.filter = "blur(1px)";
+              break;
+            case "blurry":
+              ctx.filter = "blur(2px)";
+              break;
+            case "glow":
+              // Determine if this is an accent color
+              const isAccent =
+                p.color.includes("100%") ||
+                p.color.includes("90%") ||
+                p.color.includes("85%");
+              const glowBlur = isAccent ? 10 : 6;
+              const filterBlur = isAccent ? "3px" : "2px";
+              ctx.filter = `blur(${filterBlur})`;
+              ctx.shadowColor = p.color;
+              ctx.shadowBlur = glowBlur;
+              break;
+            // case 'sharp': // Default, no filter/shadow needed
+          }
+
+          // Draw Shape
+          ctx.beginPath();
+          if (p.shape === "circle") {
+            ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2);
+          } else if (p.shape === "square") {
+            ctx.rect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+          } else if (p.shape === "triangle") {
+            // Simple equilateral triangle pointing up
+            const height = (Math.sqrt(3) / 2) * p.size;
+            ctx.moveTo(p.x, p.y - height / 2); // Top point
+            ctx.lineTo(p.x - p.size / 2, p.y + height / 2); // Bottom left
+            ctx.lineTo(p.x + p.size / 2, p.y + height / 2); // Bottom right
+            ctx.closePath();
+          }
+          ctx.fill();
+
+          ctx.restore(); // Restore context state
+        });
+      }
+
+      // Animation loop
+      function animate() {
+        drawParticles();
+        requestAnimationFrame(animate);
+      }
+
+      // Navigation functions
+      function navigateToLinkedIn() {
+        window.location.href = "https://www.linkedin.com/in/benmalen/";
+      }
+
+      // Event listeners for navigation
+      document.body.addEventListener("click", navigateToLinkedIn);
+      document
+        .querySelector(".terminal")
+        .addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            navigateToLinkedIn();
+          }
+        });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          navigateToLinkedIn();
+        }
+      });
+
+      // Initialize and start animation
+      resizeCanvas();
+      animate();
+    </script>
+  </body>
+</html>
